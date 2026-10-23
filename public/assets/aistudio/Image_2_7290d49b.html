@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tabular — Instant Markdown Table Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+            display: ["Geist", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #52525b; }
+    .table-cell-input:focus { outline: none; }
+  </style>
+</head>
+<body class="bg-[#0c0c0e] text-zinc-100 font-sans antialiased min-h-screen flex flex-col selection:bg-indigo-500/30 selection:text-indigo-200">
+<!-- Top Global Header -->
+<header class="border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-40">
+<div class="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+<span class="material-symbols-outlined text-white text-[19px]">table_chart</span>
+</div>
+<span class="font-display font-semibold text-lg tracking-tight text-white flex items-center gap-2">
+          Tabular <span class="text-[11px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 font-normal border border-zinc-700/60">v1.2</span>
+</span>
+<div class="hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 font-mono text-[11px] text-emerald-400">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          100% Client-Side • Zero Backend
+        </div>
+</div>
+<nav class="hidden md:flex items-center gap-1 text-xs font-medium text-zinc-400">
+<a class="px-3 py-1.5 rounded-md bg-zinc-800/80 text-zinc-100" href="#">Converter</a>
+<a class="px-3 py-1.5 rounded-md hover:text-zinc-200 hover:bg-zinc-800/40 transition" href="#">Templates</a>
+<a class="px-3 py-1.5 rounded-md hover:text-zinc-200 hover:bg-zinc-800/40 transition" href="#">Docs</a>
+<a class="px-3 py-1.5 rounded-md hover:text-zinc-200 hover:bg-zinc-800/40 transition" href="#">Security</a>
+</nav>
+<div class="flex items-center gap-3 text-xs">
+<div class="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-800 font-mono text-zinc-400">
+<span>Press</span>
+<kbd class="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-200 font-semibold border border-zinc-700">⌘V</kbd>
+<span>to paste spreadsheet</span>
+</div>
+<a class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 transition text-xs font-medium" href="https://github.com" target="_blank">
+<span class="material-symbols-outlined text-[16px] text-amber-400">star</span>
+<span class="hidden sm:inline">Star on GitHub</span>
+</a>
+</div>
+</div>
+</header>
+<!-- Main Content Layout Area -->
+<main class="flex-1 flex flex-col justify-start w-full">
+<!-- 1. Top Ribbon & Global Settings Bar -->
+<section class="border-b border-zinc-800/70 bg-zinc-900/40">
+<div class="max-w-7xl mx-auto px-6 py-3 flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3">
+<!-- Left: Demo Presets & Canvas Controls -->
+<div class="flex items-center flex-wrap gap-2 text-xs">
+<!-- Preset Selector -->
+<div class="relative">
+<button class="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700/80 text-zinc-200 rounded-lg border border-zinc-700/70 transition shadow-sm font-medium" id="presetBtn">
+<span class="material-symbols-outlined text-[16px] text-indigo-400">auto_fix_high</span>
+<span id="currentPresetLabel">AI Models Benchmark</span>
+<span class="material-symbols-outlined text-[15px] text-zinc-400">expand_more</span>
+</button>
+<div class="hidden absolute left-0 mt-1.5 w-56 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl py-1 z-50" id="presetMenu">
+<button class="preset-option w-full text-left px-3.5 py-2 hover:bg-zinc-800 text-zinc-200 text-xs flex items-center justify-between transition" data-preset="ai_models">
+<span>AI Models Benchmark</span>
+<span class="font-mono text-[10px] text-indigo-400">5×5</span>
+</button>
+<button class="preset-option w-full text-left px-3.5 py-2 hover:bg-zinc-800 text-zinc-200 text-xs flex items-center justify-between transition" data-preset="saas_pricing">
+<span>SaaS Pricing Tiers</span>
+<span class="font-mono text-[10px] text-emerald-400">4×4</span>
+</button>
+<button class="preset-option w-full text-left px-3.5 py-2 hover:bg-zinc-800 text-zinc-200 text-xs flex items-center justify-between transition" data-preset="feature_matrix">
+<span>Feature Matrix</span>
+<span class="font-mono text-[10px] text-amber-400">6×4</span>
+</button>
+</div>
+</div>
+<!-- Import CSV/TSV File -->
+<label class="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-lg border border-zinc-800 transition font-medium">
+<span class="material-symbols-outlined text-[15px] text-zinc-400">upload_file</span>
+<span>Import CSV/TSV</span>
+<input accept=".csv, .tsv, .txt" class="hidden" id="fileImporter" type="file"/>
+</label>
+<!-- Clear Grid -->
+<button class="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30 text-zinc-400 rounded-lg border border-zinc-800 transition font-medium" id="resetTableBtn">
+<span class="material-symbols-outlined text-[15px]">delete_sweep</span>
+<span>Clear Grid</span>
+</button>
+</div>
+<!-- Right: Global Settings & Format Pills -->
+<div class="flex items-center flex-wrap gap-4 text-xs">
+<!-- Format Pills -->
+<div class="flex items-center bg-zinc-950 p-1 rounded-lg border border-zinc-800">
+<button class="format-pill px-2.5 py-1 rounded font-medium transition text-white bg-indigo-600 shadow-sm" data-format="gfm">GFM</button>
+<button class="format-pill px-2.5 py-1 rounded font-medium transition text-zinc-400 hover:text-zinc-200" data-format="minimal">Clean</button>
+<button class="format-pill px-2.5 py-1 rounded font-medium transition text-zinc-400 hover:text-zinc-200" data-format="html">&lt;table&gt;</button>
+<button class="format-pill px-2.5 py-1 rounded font-medium transition text-zinc-400 hover:text-zinc-200" data-format="json">JSON</button>
+</div>
+<div class="hidden xl:block h-4 w-[1px] bg-zinc-800"></div>
+<!-- Toggles -->
+<div class="flex items-center gap-3 select-none text-zinc-300">
+<label class="flex items-center gap-1.5 cursor-pointer hover:text-zinc-100 transition">
+<input checked="" class="rounded border-zinc-700 bg-zinc-900 text-indigo-500 focus:ring-0 focus:ring-offset-0 cursor-pointer" id="headerToggle" type="checkbox"/>
+<span>First Row as Header</span>
+</label>
+<label class="flex items-center gap-1.5 cursor-pointer hover:text-zinc-100 transition">
+<input checked="" class="rounded border-zinc-700 bg-zinc-900 text-indigo-500 focus:ring-0 focus:ring-offset-0 cursor-pointer" id="pipeEscapeToggle" type="checkbox"/>
+<span>Escape Pipes (<code class="text-indigo-400 font-mono">|</code>)</span>
+</label>
+<label class="flex items-center gap-1.5 cursor-pointer px-2 py-1 rounded-md bg-indigo-500/10 text-indigo-300 hover:bg-indigo-500/20 transition font-medium border border-indigo-500/20">
+<input class="rounded border-indigo-400 bg-zinc-900 text-indigo-500 focus:ring-0 focus:ring-offset-0 cursor-pointer" id="compactToggle" type="checkbox"/>
+<span>LLM Compact Mode</span>
+</label>
+</div>
+</div>
+</div>
+</section>
+<!-- 2 & 3. Side-by-Side Expansive Split Pane Desktop Grid -->
+<div class="max-w-7xl mx-auto w-full px-6 py-6 flex-1 flex flex-col">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full flex-1">
+<!-- LEFT COLUMN: Spreadsheet Grid Editor -->
+<div class="bg-zinc-900/70 border border-zinc-800 rounded-xl p-5 flex flex-col h-[680px] shadow-2xl relative">
+<!-- Editor Header -->
+<div class="flex items-center justify-between pb-3 border-b border-zinc-800/80">
+<div class="flex items-center gap-2.5">
+<div class="flex items-center gap-1.5 text-zinc-100 font-display font-medium text-sm">
+<span class="material-symbols-outlined text-indigo-400 text-[18px]">table_edit</span>
+                Interactive Grid Editor
+              </div>
+<span class="px-2 py-0.5 rounded-full bg-zinc-800 border border-zinc-700/60 font-mono text-[11px] text-zinc-400" id="gridDimensions">
+                5 rows × 5 cols
+              </span>
+</div>
+<!-- Action buttons in header -->
+<div class="flex items-center gap-1.5">
+<button class="flex items-center gap-1 px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700/80 text-zinc-200 text-xs rounded-md border border-zinc-700/60 transition font-medium" id="addColBtn">
+<span class="material-symbols-outlined text-[14px] text-indigo-400">add</span> Col
+              </button>
+<button class="flex items-center gap-1 px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700/80 text-zinc-200 text-xs rounded-md border border-zinc-700/60 transition font-medium" id="addRowBtn">
+<span class="material-symbols-outlined text-[14px] text-indigo-400">add</span> Row
+              </button>
+<div class="relative group ml-1">
+<button class="p-1 rounded text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition">
+<span class="material-symbols-outlined text-[17px]">info</span>
+</button>
+<div class="absolute right-0 top-7 w-60 p-2.5 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-300 text-[11px] shadow-2xl hidden group-hover:block z-30 pointer-events-none">
+<div class="font-semibold text-zinc-100 mb-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-emerald-400">lightbulb</span> Paste Instructions
+                  </div>
+                  Press <kbd class="px-1 bg-zinc-800 rounded text-zinc-200 font-mono">⌘V</kbd> anywhere on screen to paste Excel, Sheets, or raw TSV/CSV text directly into the grid.
+                </div>
+</div>
+</div>
+</div>
+<!-- Instruction Ambient Bar -->
+<div class="py-2 flex items-center justify-between text-[11px] text-zinc-400 font-mono">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px] text-indigo-400">keyboard_command_key</span>
+              Click any cell to edit. Tab moves across, Enter down.
+            </span>
+<button class="text-indigo-400 hover:text-indigo-300 underline font-medium" id="autoAlignAllBtn">
+              Auto-Align Columns
+            </button>
+</div>
+<!-- Scrollable Table Matrix Container -->
+<div class="overflow-auto flex-1 border border-zinc-800/80 rounded-lg bg-zinc-950/60 relative">
+<table class="w-full border-collapse text-xs select-none" id="spreadsheetTable">
+<thead class="sticky top-0 z-20 bg-zinc-900 border-b border-zinc-800 shadow-sm" id="tableHead">
+<!-- Dynamically Rendered Header -->
+</thead>
+<tbody class="divide-y divide-zinc-800/50" id="tableBody">
+<!-- Dynamically Rendered Data Rows -->
+</tbody>
+</table>
+</div>
+<!-- Bottom bar with quick buttons -->
+<div class="pt-3 mt-1 flex items-center justify-between gap-2 border-t border-zinc-800/70">
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-zinc-800/70 hover:bg-zinc-800 text-zinc-300 text-xs font-medium border border-zinc-700/40 transition" id="appendRowQuick">
+<span class="material-symbols-outlined text-[14px] text-emerald-400">playlist_add</span>
+                + Add Row at End
+              </button>
+<button class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-zinc-800/70 hover:bg-zinc-800 text-zinc-300 text-xs font-medium border border-zinc-700/40 transition" id="appendColQuick">
+<span class="material-symbols-outlined text-[14px] text-indigo-400">view_column</span>
+                + Add Column
+              </button>
+</div>
+<button class="text-xs font-medium text-zinc-400 hover:text-zinc-200 flex items-center gap-1 px-2 py-1 rounded hover:bg-zinc-800 transition" id="pasteDataTrigger">
+<span class="material-symbols-outlined text-[14px]">content_paste</span>
+              Manual Input Dialog
+            </button>
+</div>
+</div>
+<!-- RIGHT COLUMN: Live Markdown Output & Preview -->
+<div class="bg-zinc-900/70 border border-zinc-800 rounded-xl p-5 flex flex-col h-[680px] shadow-2xl relative">
+<!-- Header with View Switch Tabs and Stats Badge -->
+<div class="flex items-center justify-between pb-3 border-b border-zinc-800/80">
+<!-- Tabs -->
+<div class="flex items-center bg-zinc-950 p-1 rounded-lg border border-zinc-800">
+<button class="px-3 py-1 rounded text-xs font-medium bg-zinc-800 text-zinc-100 shadow transition" id="viewFormattedBtn">
+                Formatted Preview
+              </button>
+<button class="px-3 py-1 rounded text-xs font-medium text-zinc-400 hover:text-zinc-200 transition" id="viewRawBtn">
+                Raw Markdown
+              </button>
+</div>
+<!-- Stats Badge -->
+<div class="flex items-center gap-1.5">
+<span class="font-mono text-[11px] px-2.5 py-1 rounded-md bg-zinc-800/80 border border-zinc-700/60 text-zinc-300" id="telemetryBadge">
+                0.4 KB · 54 tokens · 32% token savings with compact mode
+              </span>
+</div>
+</div>
+<!-- Main Output Viewport Area -->
+<div class="flex-1 overflow-auto my-3 rounded-lg border border-zinc-800 bg-zinc-950/80 relative">
+<!-- Tab 1: Formatted Preview (GitHub Style Table) -->
+<div class="p-4 overflow-auto h-full" id="formattedPreviewContainer">
+<div class="overflow-x-auto" id="renderedTableWrapper">
+<!-- Formatted HTML Preview Injected Here -->
+</div>
+</div>
+<!-- Tab 2: Raw Monospace Code Block -->
+<div class="hidden h-full flex flex-col p-4" id="rawOutputContainer">
+<div class="flex items-center justify-between pb-2 mb-2 border-b border-zinc-800 text-[11px] font-mono text-zinc-400">
+<span>markdown-preview.md</span>
+<span class="text-indigo-400 font-mono">GFM compliant</span>
+</div>
+<textarea class="w-full flex-1 bg-transparent text-zinc-200 font-mono text-xs leading-relaxed resize-none focus:outline-none select-all" id="rawCodeArea" readonly="" spellcheck="false"></textarea>
+</div>
+</div>
+<!-- Action Footer -->
+<div class="pt-3 border-t border-zinc-800/80 flex flex-wrap items-center justify-between gap-3">
+<!-- Big Primary Copy Button -->
+<button class="flex-1 min-w-[200px] py-2 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 transition duration-200" id="primaryCopyBtn">
+<span class="material-symbols-outlined text-[17px]" id="copyBtnIcon">content_copy</span>
+<span id="copyBtnText">Copy Markdown (⌘C)</span>
+</button>
+<!-- Secondary Actions -->
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700/80 text-zinc-200 text-xs font-medium border border-zinc-700/60 transition" id="copyHtmlBtn">
+<span class="material-symbols-outlined text-[15px] text-zinc-400">html</span>
+<span>Copy as HTML</span>
+</button>
+<button class="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700/80 text-zinc-200 text-xs font-medium border border-zinc-700/60 transition" id="copyPromptBtn" title="Wrap in prompt template for ChatGPT or Claude">
+<span class="material-symbols-outlined text-[15px] text-indigo-400">psychology</span>
+<span>Prompt Template</span>
+</button>
+<button class="p-2 rounded-lg bg-zinc-800 hover:bg-zinc-700/80 text-zinc-200 text-xs font-medium border border-zinc-700/60 transition" id="downloadFileBtn" title="Download .md file">
+<span class="material-symbols-outlined text-[16px]">download</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- 4. Bottom Bar: Token Efficiency Benchmarking & Privacy Guarantee -->
+<section class="border-t border-zinc-800/80 bg-zinc-950/60 py-4 mt-auto">
+<div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+<!-- Token Efficiency Visual Bar -->
+<div class="w-full md:w-1/2 flex flex-col gap-1.5">
+<div class="flex items-center justify-between text-xs">
+<span class="flex items-center gap-1.5 font-medium text-zinc-300">
+<span class="material-symbols-outlined text-[16px] text-amber-400">bolt</span>
+              LLM Prompt Token Efficiency
+            </span>
+<span class="font-mono text-[11px] text-emerald-400 font-semibold" id="tokenSavingsText">
+              Save up to 34% token space
+            </span>
+</div>
+<div class="w-full h-2 rounded-full bg-zinc-800 overflow-hidden flex">
+<div class="bg-gradient-to-r from-indigo-500 to-emerald-400 h-full rounded-full transition-all duration-300" id="efficiencyBar" style="width: 34%;"></div>
+</div>
+<div class="flex items-center justify-between text-[11px] font-mono text-zinc-400">
+<span>Standard Padded: <span class="text-zinc-200" id="standardTokenTag">~82 tokens</span></span>
+<span>Compact Token Saver: <span class="text-emerald-400 font-semibold" id="compactTokenTag">~54 tokens</span></span>
+</div>
+</div>
+<!-- Privacy Guarantee Banner -->
+<div class="flex items-center gap-2 text-xs text-zinc-400 bg-zinc-900/60 border border-zinc-800 px-3.5 py-2 rounded-lg">
+<span class="material-symbols-outlined text-[16px] text-emerald-400">lock</span>
+<span>🔒 <strong>100% Client-Side.</strong> No telemetry, zero server roundtrips, cell data never leaves your device.</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Global Footer -->
+<footer class="border-t border-zinc-800/60 py-3 text-center text-zinc-500 text-xs">
+<div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
+<span>Shortcuts: <kbd class="px-1 py-0.5 rounded bg-zinc-800 font-mono text-zinc-300">⌘+C</kbd> Copy • <kbd class="px-1 py-0.5 rounded bg-zinc-800 font-mono text-zinc-300">⌘+V</kbd> Fast Paste • <kbd class="px-1 py-0.5 rounded bg-zinc-800 font-mono text-zinc-300">Tab</kbd> Cell Nav</span>
+<span>© 2025 Tabular Studio. Open Source MIT.</span>
+</div>
+</footer>
+<!-- Modal: Manual Input Dialog -->
+<div class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" id="pasteModal">
+<div class="w-full max-w-xl bg-zinc-900 border border-zinc-800 rounded-xl p-5 shadow-2xl flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<h3 class="font-display font-semibold text-sm text-zinc-100 flex items-center gap-2">
+<span class="material-symbols-outlined text-indigo-400 text-[18px]">data_table</span>
+          Paste Delimited Spreadsheet or Text
+        </h3>
+<button class="text-zinc-400 hover:text-zinc-100" id="closePasteModal">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<p class="text-xs text-zinc-400">
+        Drop raw text copied from Excel, Sheets, Airtable or CSV files. Automatically recognizes Tab, Comma, or Semicolon delimiters.
+      </p>
+<textarea class="w-full p-3 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-200 font-mono text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none" id="modalTextInput" placeholder="Model	Provider	Context
+Claude 3.5 Sonnet	Anthropic	200k" rows="7"></textarea>
+<div class="flex items-center justify-end gap-2 text-xs">
+<button class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition" id="cancelModalBtn">Cancel</button>
+<button class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition shadow" id="applyModalPasteBtn">Parse &amp; Load Table</button>
+</div>
+</div>
+</div>
+<!-- Visual Toast -->
+<div class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2 px-4 py-2.5 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-100 shadow-2xl text-xs font-medium" id="liveToast">
+<span class="material-symbols-outlined text-[18px] text-emerald-400" id="toastIcon">check_circle</span>
+<span id="toastMsg">Copied Markdown!</span>
+</div>
+<!-- Application Logic -->
+<script>
+    (function() {
+      // Demo Presets catalog
+      const PRESETS = {
+        ai_models: {
+          label: "AI Models Benchmark",
+          headers: ["Model", "Provider", "Context", "Input ($/1M)", "Output ($/1M)"],
+          alignments: ["left", "left", "center", "right", "right"],
+          rows: [
+            ["Claude 3.5 Sonnet", "Anthropic", "200k", "$3.00", "$15.00"],
+            ["GPT-4o", "OpenAI", "128k", "$2.50", "$10.00"],
+            ["Gemini 1.5 Pro", "Google", "2M", "$1.25", "$5.00"],
+            ["DeepSeek V3", "DeepSeek", "64k", "$0.14", "$0.28"],
+            ["Llama 3.3 70B", "Meta / Fireworks", "128k", "$0.90", "$0.90"]
+          ]
+        },
+        saas_pricing: {
+          label: "SaaS Pricing Tiers",
+          headers: ["Plan Tier", "Price / Mo", "Included Users", "Storage Cap"],
+          alignments: ["left", "right", "center", "right"],
+          rows: [
+            ["Starter", "$19", "3 Seats", "20 GB"],
+            ["Team Pro", "$79", "15 Seats", "250 GB"],
+            ["Enterprise", "$299", "Unlimited", "2 TB"],
+            ["Custom Grid", "Talk to Sales", "Dedicated", "Unlimited"]
+          ]
+        },
+        feature_matrix: {
+          label: "Feature Matrix",
+          headers: ["Capability", "Free Tier", "Professional", "Enterprise"],
+          alignments: ["left", "center", "center", "center"],
+          rows: [
+            ["Markdown Export", "✓", "✓", "✓"],
+            ["CSV Batch Parser", "3 / day", "Unlimited", "Unlimited"],
+            ["LLM Token Optimizer", "—", "✓", "✓"],
+            ["Custom Themes", "—", "—", "✓"],
+            ["SSO / SAML Auth", "—", "—", "✓"],
+            ["SLA Guarantee", "99.0%", "99.9%", "99.99%"]
+          ]
+        }
+      };
+
+      // State
+      let headers = [...PRESETS.ai_models.headers];
+      let alignments = [...PRESETS.ai_models.alignments];
+      let rows = PRESETS.ai_models.rows.map(r => [...r]);
+      let currentFormat = "gfm"; // gfm, minimal, html, json
+      let activeView = "formatted"; // formatted, raw
+
+      // Elements
+      const tableHead = document.getElementById("tableHead");
+      const tableBody = document.getElementById("tableBody");
+      const gridDimensions = document.getElementById("gridDimensions");
+      const rawCodeArea = document.getElementById("rawCodeArea");
+      const renderedTableWrapper = document.getElementById("renderedTableWrapper");
+      const formattedPreviewContainer = document.getElementById("formattedPreviewContainer");
+      const rawOutputContainer = document.getElementById("rawOutputContainer");
+      const telemetryBadge = document.getElementById("telemetryBadge");
+      const tokenSavingsText = document.getElementById("tokenSavingsText");
+      const efficiencyBar = document.getElementById("efficiencyBar");
+      const standardTokenTag = document.getElementById("standardTokenTag");
+      const compactTokenTag = document.getElementById("compactTokenTag");
+      const headerToggle = document.getElementById("headerToggle");
+      const pipeEscapeToggle = document.getElementById("pipeEscapeToggle");
+      const compactToggle = document.getElementById("compactToggle");
+      const primaryCopyBtn = document.getElementById("primaryCopyBtn");
+      const copyBtnText = document.getElementById("copyBtnText");
+      const copyBtnIcon = document.getElementById("copyBtnIcon");
+      const presetBtn = document.getElementById("presetBtn");
+      const presetMenu = document.getElementById("presetMenu");
+      const currentPresetLabel = document.getElementById("currentPresetLabel");
+      const viewFormattedBtn = document.getElementById("viewFormattedBtn");
+      const viewRawBtn = document.getElementById("viewRawBtn");
+
+      // Preset Dropdown Handling
+      presetBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        presetMenu.classList.toggle("hidden");
+      });
+      window.addEventListener("click", () => presetMenu.classList.add("hidden"));
+
+      document.querySelectorAll(".preset-option").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const key = btn.dataset.preset;
+          const p = PRESETS[key];
+          if (p) {
+            headers = [...p.headers];
+            alignments = [...p.alignments];
+            rows = p.rows.map(r => [...r]);
+            currentPresetLabel.textContent = p.label;
+            renderGrid();
+            recalculateOutput();
+            triggerToast(`Loaded "${p.label}"`);
+          }
+        });
+      });
+
+      // Alignment Helpers
+      function getNextAlign(align) {
+        if (align === "left") return "center";
+        if (align === "center") return "right";
+        return "left";
+      }
+
+      function getAlignIcon(align) {
+        if (align === "center") return "format_align_center";
+        if (align === "right") return "format_align_right";
+        return "format_align_left";
+      }
+
+      // Render Grid Function
+      function renderGrid() {
+        gridDimensions.textContent = `${rows.length} rows × ${headers.length} cols`;
+
+        // Render Head
+        let headHtml = `<tr class="border-b border-zinc-800">`;
+        headHtml += `<th class="w-9 px-2 py-2 text-center text-zinc-500 font-mono text-[11px] font-normal bg-zinc-900 select-none">#</th>`;
+        
+        headers.forEach((h, colIdx) => {
+          const align = alignments[colIdx] || "left";
+          headHtml += `
+            <th class="px-2 py-1.5 bg-zinc-900 border-r border-zinc-800/60 last:border-r-0 group">
+              <div class="flex items-center gap-1">
+                <input type="text" data-header-idx="${colIdx}" value="${escapeHtml(h)}" class="table-cell-input bg-transparent border-0 focus:bg-zinc-800 rounded px-1.5 py-0.5 text-zinc-100 font-semibold text-xs w-full text-${align}"/>
+                <div class="flex items-center opacity-40 group-hover:opacity-100 transition">
+                  <button data-align-col="${colIdx}" title="Cycle Alignment (${align})" class="p-1 hover:bg-zinc-800 rounded text-zinc-300 hover:text-indigo-400">
+                    <span class="material-symbols-outlined text-[13px]">${getAlignIcon(align)}</span>
+                  </button>
+                  <button data-del-col="${colIdx}" title="Delete Column" class="p-1 hover:bg-red-500/20 rounded text-zinc-400 hover:text-red-400">
+                    <span class="material-symbols-outlined text-[13px]">close</span>
+                  </button>
+                </div>
+              </div>
+            </th>
+          `;
+        });
+        headHtml += `</tr>`;
+        tableHead.innerHTML = headHtml;
+
+        // Render Rows
+        let bodyHtml = "";
+        rows.forEach((row, rowIdx) => {
+          bodyHtml += `<tr class="group hover:bg-zinc-900/40 border-b border-zinc-800/40 last:border-b-0">`;
+          bodyHtml += `
+            <td class="w-9 px-2 py-1 text-center font-mono text-[11px] text-zinc-500 bg-zinc-950/40 select-none border-r border-zinc-800/60">
+              <div class="relative flex items-center justify-center">
+                <span class="group-hover:hidden">${rowIdx + 1}</span>
+                <button data-del-row="${rowIdx}" title="Delete Row" class="hidden group-hover:flex items-center justify-center text-red-400 hover:text-red-300">
+                  <span class="material-symbols-outlined text-[13px]">delete</span>
+                </button>
+              </div>
+            </td>
+          `;
+
+          row.forEach((cell, colIdx) => {
+            const align = alignments[colIdx] || "left";
+            bodyHtml += `
+              <td class="p-1 border-r border-zinc-800/60 last:border-r-0">
+                <input type="text" data-row="${rowIdx}" data-col="${colIdx}" value="${escapeHtml(cell)}" class="table-cell-input w-full bg-transparent hover:bg-zinc-900/60 focus:bg-zinc-900 focus:ring-1 focus:ring-indigo-500 px-2 py-1 rounded text-zinc-200 text-xs text-${align} transition"/>
+              </td>
+            `;
+          });
+          bodyHtml += `</tr>`;
+        });
+        tableBody.innerHTML = bodyHtml;
+
+        bindEvents();
+      }
+
+      function bindEvents() {
+        // Headers input
+        document.querySelectorAll("[data-header-idx]").forEach(inp => {
+          inp.addEventListener("input", (e) => {
+            const idx = parseInt(e.target.dataset.headerIdx, 10);
+            headers[idx] = e.target.value;
+            recalculateOutput();
+          });
+        });
+
+        // Column align cycle
+        document.querySelectorAll("[data-align-col]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const idx = parseInt(btn.dataset.alignCol, 10);
+            alignments[idx] = getNextAlign(alignments[idx] || "left");
+            renderGrid();
+            recalculateOutput();
+          });
+        });
+
+        // Delete Column
+        document.querySelectorAll("[data-del-col]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            if (headers.length <= 1) {
+              triggerToast("Table needs at least one column", true);
+              return;
+            }
+            const idx = parseInt(btn.dataset.delCol, 10);
+            headers.splice(idx, 1);
+            alignments.splice(idx, 1);
+            rows.forEach(r => r.splice(idx, 1));
+            renderGrid();
+            recalculateOutput();
+          });
+        });
+
+        // Delete Row
+        document.querySelectorAll("[data-del-row]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const idx = parseInt(btn.dataset.delRow, 10);
+            rows.splice(idx, 1);
+            if (rows.length === 0) rows.push(new Array(headers.length).fill(""));
+            renderGrid();
+            recalculateOutput();
+          });
+        });
+
+        // Cell input
+        document.querySelectorAll("[data-row]").forEach(inp => {
+          inp.addEventListener("input", (e) => {
+            const r = parseInt(e.target.dataset.row, 10);
+            const c = parseInt(e.target.dataset.col, 10);
+            rows[r][c] = e.target.value;
+            recalculateOutput();
+          });
+
+          inp.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              const r = parseInt(inp.dataset.row, 10);
+              const c = parseInt(inp.dataset.col, 10);
+              if (r + 1 < rows.length) {
+                const next = document.querySelector(`[data-row="${r + 1}"][data-col="${c}"]`);
+                if (next) next.focus();
+              } else {
+                appendRow();
+                setTimeout(() => {
+                  const next = document.querySelector(`[data-row="${r + 1}"][data-col="${c}"]`);
+                  if (next) next.focus();
+                }, 50);
+              }
+            }
+          });
+        });
+      }
+
+      function appendRow() {
+        rows.push(new Array(headers.length).fill(""));
+        renderGrid();
+        recalculateOutput();
+      }
+
+      function appendCol() {
+        headers.push(`Col ${headers.length + 1}`);
+        alignments.push("left");
+        rows.forEach(r => r.push(""));
+        renderGrid();
+        recalculateOutput();
+      }
+
+      document.getElementById("addRowBtn").addEventListener("click", appendRow);
+      document.getElementById("appendRowQuick").addEventListener("click", appendRow);
+      document.getElementById("addColBtn").addEventListener("click", appendCol);
+      document.getElementById("appendColQuick").addEventListener("click", appendCol);
+
+      // Auto align all columns
+      document.getElementById("autoAlignAllBtn").addEventListener("click", () => {
+        // Automatically determine best alignment (numbers -> right, short tags -> center, text -> left)
+        headers.forEach((h, colIdx) => {
+          let numberCount = 0;
+          let totalCells = 0;
+          rows.forEach(r => {
+            const val = (r[colIdx] || "").trim();
+            if (val) {
+              totalCells++;
+              if (/^[\$\€\£\¥]?\s*[\d,\.]+%?$/.test(val)) numberCount++;
+            }
+          });
+          if (totalCells > 0 && numberCount / totalCells > 0.6) {
+            alignments[colIdx] = "right";
+          } else {
+            alignments[colIdx] = "left";
+          }
+        });
+        renderGrid();
+        recalculateOutput();
+        triggerToast("Columns automatically aligned");
+      });
+
+      // Clear Canvas
+      document.getElementById("resetTableBtn").addEventListener("click", () => {
+        headers = ["Col 1", "Col 2", "Col 3"];
+        alignments = ["left", "left", "left"];
+        rows = [["", "", ""]];
+        currentPresetLabel.textContent = "Custom Blank";
+        renderGrid();
+        recalculateOutput();
+        triggerToast("Grid cleared");
+      });
+
+      // Generator Core
+      function generateOutput() {
+        const isCompact = compactToggle.checked;
+        const escapePipes = pipeEscapeToggle.checked;
+        const hasHeader = headerToggle.checked;
+
+        const cleanVal = (val) => {
+          let str = val === undefined || val === null ? "" : String(val);
+          if (escapePipes) str = str.replace(/\|/g, "\\|");
+          return str;
+        };
+
+        if (currentFormat === "json") {
+          const list = rows.map(r => {
+            let item = {};
+            headers.forEach((h, idx) => {
+              item[h || `col_${idx}`] = r[idx] || "";
+            });
+            return item;
+          });
+          return JSON.stringify(list, null, 2);
+        }
+
+        if (currentFormat === "html") {
+          let html = `<table class="tabular-table">\n`;
+          if (hasHeader) {
+            html += `  <thead>\n    <tr>\n`;
+            headers.forEach((h, i) => {
+              const align = alignments[i] ? ` align="${alignments[i]}"` : "";
+              html += `      <th${align}>${escapeHtml(h)}</th>\n`;
+            });
+            html += `    </tr>\n  </thead>\n`;
+          }
+          html += `  <tbody>\n`;
+          rows.forEach(r => {
+            html += `    <tr>\n`;
+            r.forEach((c, i) => {
+              const align = alignments[i] ? ` align="${alignments[i]}"` : "";
+              html += `      <td${align}>${escapeHtml(c)}</td>\n`;
+            });
+            html += `    </tr>\n`;
+          });
+          html += `  </tbody>\n</table>`;
+          return html;
+        }
+
+        // Markdown generation (GFM or Clean)
+        const colWidths = headers.map((h, i) => {
+          let maxLen = hasHeader ? cleanVal(h).length : 0;
+          rows.forEach(r => {
+            const len = cleanVal(r[i] || "").length;
+            if (len > maxLen) maxLen = len;
+          });
+          return Math.max(maxLen, 3);
+        });
+
+        const pad = (str, len, align) => {
+          if (isCompact) return str;
+          str = str || "";
+          const diff = len - str.length;
+          if (diff <= 0) return str;
+          if (align === "right") return " ".repeat(diff) + str;
+          if (align === "center") {
+            const left = Math.floor(diff / 2);
+            return " ".repeat(left) + str + " ".repeat(diff - left);
+          }
+          return str + " ".repeat(diff);
+        };
+
+        let lines = [];
+        if (hasHeader) {
+          const headerCells = headers.map((h, i) => {
+            const txt = cleanVal(h);
+            return isCompact ? txt : ` ${pad(txt, colWidths[i], alignments[i])} `;
+          }).join("|");
+          lines.push(`|${headerCells}|`);
+
+          const sepCells = colWidths.map((w, i) => {
+            const align = alignments[i];
+            if (isCompact) {
+              if (align === "center") return ":-:";
+              if (align === "right") return "--:";
+              return ":--";
+            }
+            if (align === "center") return ` :${"-".repeat(Math.max(w - 2, 1))}: `;
+            if (align === "right") return ` ${"-".repeat(Math.max(w - 1, 2))}: `;
+            return ` :${"-".repeat(Math.max(w - 1, 2))} `;
+          }).join("|");
+          lines.push(`|${sepCells}|`);
+        }
+
+        rows.forEach(r => {
+          const rowCells = headers.map((_, i) => {
+            const txt = cleanVal(r[i] || "");
+            return isCompact ? txt : ` ${pad(txt, colWidths[i], alignments[i])} `;
+          }).join("|");
+          lines.push(`|${rowCells}|`);
+        });
+
+        return lines.join("\n");
+      }
+
+      function recalculateOutput() {
+        const text = generateOutput();
+        rawCodeArea.value = text;
+        renderHtmlPreview();
+
+        // Calculate statistics
+        const bytes = new Blob([text]).size;
+        const kbSize = (bytes / 1024).toFixed(1);
+        const estTokens = Math.ceil(bytes / 3.8);
+
+        // Calculate uncompacted standard estimate
+        const standardBytes = calculateStandardBytes();
+        const standardTokens = Math.ceil(standardBytes / 3.8);
+        const savedPct = Math.max(0, Math.round(((standardBytes - bytes) / standardBytes) * 100));
+
+        standardTokenTag.textContent = `~${standardTokens} tokens`;
+        compactTokenTag.textContent = `~${estTokens} tokens`;
+
+        if (compactToggle.checked) {
+          telemetryBadge.textContent = `${kbSize} KB · ${estTokens} tokens · ${savedPct}% token savings with compact mode`;
+          tokenSavingsText.textContent = `${savedPct}% overhead eliminated!`;
+          efficiencyBar.style.width = `${Math.max(savedPct, 15)}%`;
+        } else {
+          telemetryBadge.textContent = `${kbSize} KB · ${estTokens} tokens · 0% compact savings (Standard Mode)`;
+          tokenSavingsText.textContent = `Turn on Compact Mode to save ~${Math.round(((standardBytes - calculateCompactBytes()) / standardBytes) * 100)}% tokens`;
+          efficiencyBar.style.width = `20%`;
+        }
+      }
+
+      function calculateStandardBytes() {
+        const colWidths = headers.map((h, i) => {
+          let maxLen = h.length;
+          rows.forEach(r => {
+            const len = (r[i] || "").length;
+            if (len > maxLen) maxLen = len;
+          });
+          return Math.max(maxLen, 3);
+        });
+        const rowLen = colWidths.reduce((a, b) => a + b + 3, 1);
+        return rowLen * (rows.length + 2);
+      }
+
+      function calculateCompactBytes() {
+        let total = 0;
+        headers.forEach(h => total += h.length + 1);
+        total += headers.length * 4; // sep line
+        rows.forEach(r => {
+          headers.forEach((_, i) => {
+            total += (r[i] || "").length + 1;
+          });
+        });
+        return Math.max(total, 10);
+      }
+
+      function renderHtmlPreview() {
+        let html = `<table class="w-full text-left font-sans text-xs border border-zinc-800 rounded-lg overflow-hidden">`;
+        if (headerToggle.checked) {
+          html += `<thead class="bg-zinc-900/90 text-zinc-200 border-b border-zinc-800 font-semibold"><tr>`;
+          headers.forEach((h, i) => {
+            const align = alignments[i] || "left";
+            html += `<th class="px-3.5 py-2.5 text-${align} border-r border-zinc-800/60 last:border-r-0">${escapeHtml(h)}</th>`;
+          });
+          html += `</tr></thead>`;
+        }
+        html += `<tbody class="divide-y divide-zinc-800/60">`;
+        rows.forEach((r, idx) => {
+          const bg = idx % 2 === 1 ? "bg-zinc-900/30" : "bg-zinc-950/20";
+          html += `<tr class="${bg} hover:bg-zinc-900/70 transition">`;
+          r.forEach((c, i) => {
+            const align = alignments[i] || "left";
+            html += `<td class="px-3.5 py-2 text-${align} text-zinc-300 font-mono text-[11px] border-r border-zinc-800/40 last:border-r-0">${escapeHtml(c)}</td>`;
+          });
+          html += `</tr>`;
+        });
+        html += `</tbody></table>`;
+        renderedTableWrapper.innerHTML = html;
+      }
+
+      function escapeHtml(str) {
+        if (!str) return "";
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      // Toast feedback
+      let toastTimeout = null;
+      function triggerToast(msg, isErr = false) {
+        clearTimeout(toastTimeout);
+        const toast = document.getElementById("liveToast");
+        const icon = document.getElementById("toastIcon");
+        const text = document.getElementById("toastMsg");
+
+        text.textContent = msg;
+        if (isErr) {
+          icon.textContent = "error";
+          icon.className = "material-symbols-outlined text-[18px] text-red-400";
+        } else {
+          icon.textContent = "check_circle";
+          icon.className = "material-symbols-outlined text-[18px] text-emerald-400";
+        }
+
+        toast.classList.remove("opacity-0", "translate-y-20");
+        toast.classList.add("opacity-100", "translate-y-0");
+
+        toastTimeout = setTimeout(() => {
+          toast.classList.remove("opacity-100", "translate-y-0");
+          toast.classList.add("opacity-0", "translate-y-20");
+        }, 2200);
+      }
+
+      // Copy Actions
+      async function executeCopy() {
+        const text = generateOutput();
+        try {
+          await navigator.clipboard.writeText(text);
+          primaryCopyBtn.classList.remove("bg-indigo-600", "hover:bg-indigo-500");
+          primaryCopyBtn.classList.add("bg-emerald-600", "hover:bg-emerald-500");
+          copyBtnText.textContent = "Copied to Clipboard!";
+          copyBtnIcon.textContent = "done";
+          triggerToast("Copied Markdown table to clipboard!");
+
+          setTimeout(() => {
+            primaryCopyBtn.classList.remove("bg-emerald-600", "hover:bg-emerald-500");
+            primaryCopyBtn.classList.add("bg-indigo-600", "hover:bg-indigo-500");
+            copyBtnText.textContent = "Copy Markdown (⌘C)";
+            copyBtnIcon.textContent = "content_copy";
+          }, 1800);
+        } catch (err) {
+          triggerToast("Clipboard access denied", true);
+        }
+      }
+
+      primaryCopyBtn.addEventListener("click", executeCopy);
+
+      // Copy as HTML button
+      document.getElementById("copyHtmlBtn").addEventListener("click", async () => {
+        const oldFormat = currentFormat;
+        currentFormat = "html";
+        const code = generateOutput();
+        currentFormat = oldFormat;
+        await navigator.clipboard.writeText(code);
+        triggerToast("HTML <table> element copied!");
+      });
+
+      // Copy Prompt Template wrapper
+      document.getElementById("copyPromptBtn").addEventListener("click", async () => {
+        const md = generateOutput();
+        const promptBlock = `Here is the reference tabular dataset:\n\n\`\`\`markdown\n${md}\n\`\`\`\n\nPlease parse this table and fulfill the following task: `;
+        await navigator.clipboard.writeText(promptBlock);
+        triggerToast("Copied prompt template with embedded Markdown table!");
+      });
+
+      // Download file button
+      document.getElementById("downloadFileBtn").addEventListener("click", () => {
+        const md = generateOutput();
+        const blob = new Blob([md], { type: "text/markdown;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `table-${Date.now()}.md`;
+        link.click();
+        URL.revokeObjectURL(url);
+        triggerToast("Downloaded markdown file");
+      });
+
+      // View Tab Switching
+      viewFormattedBtn.addEventListener("click", () => {
+        activeView = "formatted";
+        viewFormattedBtn.className = "px-3 py-1 rounded text-xs font-medium bg-zinc-800 text-zinc-100 shadow transition";
+        viewRawBtn.className = "px-3 py-1 rounded text-xs font-medium text-zinc-400 hover:text-zinc-200 transition";
+        formattedPreviewContainer.classList.remove("hidden");
+        rawOutputContainer.classList.add("hidden");
+      });
+
+      viewRawBtn.addEventListener("click", () => {
+        activeView = "raw";
+        viewRawBtn.className = "px-3 py-1 rounded text-xs font-medium bg-zinc-800 text-zinc-100 shadow transition";
+        viewFormattedBtn.className = "px-3 py-1 rounded text-xs font-medium text-zinc-400 hover:text-zinc-200 transition";
+        rawOutputContainer.classList.remove("hidden");
+        formattedPreviewContainer.classList.add("hidden");
+      });
+
+      // Format Pill Selectors
+      document.querySelectorAll(".format-pill").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".format-pill").forEach(b => {
+            b.className = "format-pill px-2.5 py-1 rounded font-medium transition text-zinc-400 hover:text-zinc-200";
+          });
+          btn.className = "format-pill px-2.5 py-1 rounded font-medium transition text-white bg-indigo-600 shadow-sm";
+          currentFormat = btn.dataset.format;
+          recalculateOutput();
+        });
+      });
+
+      // Checkbox Toggles
+      headerToggle.addEventListener("change", recalculateOutput);
+      pipeEscapeToggle.addEventListener("change", recalculateOutput);
+      compactToggle.addEventListener("change", recalculateOutput);
+
+      // Delimited Text Parser
+      function parseDelimited(raw) {
+        if (!raw || !raw.trim()) return null;
+        const firstLine = raw.trim().split(/\r\n|\n|\r/)[0];
+        let sep = "\t";
+        if (firstLine.includes("\t")) sep = "\t";
+        else if (firstLine.includes(",")) sep = ",";
+        else if (firstLine.includes(";")) sep = ";";
+
+        const lines = raw.trim().split(/\r\n|\n|\r/);
+        if (!lines.length) return null;
+
+        const matrix = lines.map(l => {
+          if (sep === ",") {
+            const rx = /(?:,|\n|^)("(?:(?:"")*[^"]*)*"|[^",\n]*|(?:\n|$))/g;
+            let m, res = [];
+            while ((m = rx.exec(l)) !== null && m.index !== rx.lastIndex) {
+              let v = m[1] || "";
+              if (v.startsWith('"') && v.endsWith('"')) v = v.slice(1, -1).replace(/""/g, '"');
+              res.push(v.trim());
+            }
+            return res.length ? res : l.split(",");
+          }
+          return l.split(sep).map(c => c.trim());
+        });
+
+        const newH = matrix[0];
+        const newR = matrix.slice(1);
+        const colCount = Math.max(newH.length, ...newR.map(r => r.length));
+
+        while (newH.length < colCount) newH.push(`Col ${newH.length + 1}`);
+        newR.forEach(r => {
+          while (r.length < colCount) r.push("");
+        });
+
+        return {
+          headers: newH,
+          rows: newR.length ? newR : [new Array(colCount).fill("")]
+        };
+      }
+
+      // Global Paste Listener (Excel / Google Sheets)
+      window.addEventListener("paste", (e) => {
+        if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+        const text = (e.clipboardData || window.clipboardData).getData("text");
+        if (text) {
+          const parsed = parseDelimited(text);
+          if (parsed) {
+            headers = parsed.headers;
+            rows = parsed.rows;
+            alignments = headers.map(() => "left");
+            currentPresetLabel.textContent = "Pasted Sheet";
+            renderGrid();
+            recalculateOutput();
+            triggerToast(`Imported ${rows.length} rows × ${headers.length} columns!`);
+          }
+        }
+      });
+
+      // Modal Handling
+      const pasteModal = document.getElementById("pasteModal");
+      const pasteDataTrigger = document.getElementById("pasteDataTrigger");
+      const closePasteModal = document.getElementById("closePasteModal");
+      const cancelModalBtn = document.getElementById("cancelModalBtn");
+      const applyModalPasteBtn = document.getElementById("applyModalPasteBtn");
+      const modalTextInput = document.getElementById("modalTextInput");
+
+      pasteDataTrigger.addEventListener("click", () => {
+        modalTextInput.value = "";
+        pasteModal.classList.remove("hidden");
+        modalTextInput.focus();
+      });
+
+      const hideModal = () => pasteModal.classList.add("hidden");
+      closePasteModal.addEventListener("click", hideModal);
+      cancelModalBtn.addEventListener("click", hideModal);
+
+      applyModalPasteBtn.addEventListener("click", () => {
+        const parsed = parseDelimited(modalTextInput.value);
+        if (parsed) {
+          headers = parsed.headers;
+          rows = parsed.rows;
+          alignments = headers.map(() => "left");
+          currentPresetLabel.textContent = "Imported Content";
+          renderGrid();
+          recalculateOutput();
+          hideModal();
+          triggerToast(`Processed ${rows.length} rows`);
+        } else {
+          triggerToast("Could not recognize spreadsheet content", true);
+        }
+      });
+
+      // File upload handler
+      const fileImporter = document.getElementById("fileImporter");
+      fileImporter.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const parsed = parseDelimited(ev.target.result);
+          if (parsed) {
+            headers = parsed.headers;
+            rows = parsed.rows;
+            alignments = headers.map(() => "left");
+            currentPresetLabel.textContent = file.name.slice(0, 16);
+            renderGrid();
+            recalculateOutput();
+            triggerToast(`Loaded ${file.name}`);
+          } else {
+            triggerToast("Invalid format", true);
+          }
+        };
+        reader.readAsText(file);
+        fileImporter.value = "";
+      });
+
+      // Keyboard shortcut ⌘C when not in input
+      window.addEventListener("keydown", (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === "c" && !window.getSelection().toString()) {
+          if (document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA") {
+            e.preventDefault();
+            executeCopy();
+          }
+        }
+      });
+
+      // Initialize
+      renderGrid();
+      recalculateOutput();
+    })();
+  </script>
+</body></html>

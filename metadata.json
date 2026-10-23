@@ -1,0 +1,6 @@
+{
+  "name": "Tabular",
+  "description": "Instant Excel-to-Markdown Table Builder for developers, technical writers, and AI prompt engineers. 100% client-side with zero telemetry.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
