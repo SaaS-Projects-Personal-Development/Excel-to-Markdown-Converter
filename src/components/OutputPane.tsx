@@ -20,7 +20,7 @@ interface OutputPaneProps {
   format: ExportFormat;
   options: FormattingOptions;
   tokenStats: TokenStats;
-  onCopySuccess: (message: string) => void;
+  onCopySuccess: (message: string, type?: 'success' | 'info' | 'error') => void;
 }
 
 export const OutputPane: React.FC<OutputPaneProps> = ({
@@ -47,7 +47,7 @@ export const OutputPane: React.FC<OutputPaneProps> = ({
       );
       setTimeout(() => setCopiedPrimary(false), 2000);
     } catch {
-      onCopySuccess('Clipboard copy failed. Please grant permission.');
+      onCopySuccess('Clipboard copy failed. Check browser permissions and try again.', 'error');
     }
   };
 
@@ -57,7 +57,7 @@ export const OutputPane: React.FC<OutputPaneProps> = ({
       await navigator.clipboard.writeText(htmlCode);
       onCopySuccess('Copied HTML <table> element!');
     } catch {
-      onCopySuccess('Clipboard copy failed');
+      onCopySuccess('Clipboard copy failed. Check browser permissions and try again.', 'error');
     }
   };
 
@@ -68,7 +68,7 @@ export const OutputPane: React.FC<OutputPaneProps> = ({
       await navigator.clipboard.writeText(prompt);
       onCopySuccess('Copied AI prompt template with embedded table!');
     } catch {
-      onCopySuccess('Clipboard copy failed');
+      onCopySuccess('Clipboard copy failed. Check browser permissions and try again.', 'error');
     }
   };
 
@@ -90,14 +90,24 @@ export const OutputPane: React.FC<OutputPaneProps> = ({
       mimeType = 'text/plain';
     }
 
-    const blob = new Blob([rawOutput], { type: `${mimeType};charset=utf-8;` });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `table-${Date.now()}.${extension}`;
-    link.click();
-    URL.revokeObjectURL(url);
-    onCopySuccess(`Downloaded table.${extension}`);
+    let url: string | null = null;
+    try {
+      const blob = new Blob([rawOutput], { type: `${mimeType};charset=utf-8;` });
+      const objectUrl = URL.createObjectURL(blob);
+      url = objectUrl;
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = `table-${Date.now()}.${extension}`;
+      link.click();
+      onCopySuccess(`Downloaded table.${extension}`);
+    } catch {
+      onCopySuccess('Could not download the table. Please try again.', 'error');
+    } finally {
+      if (url) {
+        const objectUrl = url;
+        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+      }
+    }
   };
 
   const getFormatFilename = () => {
@@ -120,7 +130,7 @@ export const OutputPane: React.FC<OutputPaneProps> = ({
   return (
     <div className="bg-zinc-900/70 border border-zinc-800 rounded-xl p-4 sm:p-5 flex flex-col h-[680px] shadow-2xl relative">
       {/* Header with View Tabs & Token Statistics */}
-      <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80 gap-2">
+      <div className="flex flex-wrap items-center justify-between pb-3 border-b border-zinc-800/80 gap-2">
         {/* View Switcher Tabs */}
         <div className="flex items-center bg-zinc-950 p-1 rounded-lg border border-zinc-800">
           <button
@@ -150,11 +160,11 @@ export const OutputPane: React.FC<OutputPaneProps> = ({
         </div>
 
         {/* Stats Badge */}
-        <div className="flex items-center gap-1.5">
-          <span className="font-mono text-[11px] px-2.5 py-1 rounded-md bg-zinc-800/80 border border-zinc-700/60 text-zinc-300 truncate max-w-[220px] sm:max-w-none">
+        <div className="ml-auto flex min-w-0 max-w-full items-center gap-1.5">
+          <span className="max-w-full truncate rounded-md border border-zinc-700/60 bg-zinc-800/80 px-2.5 py-1 font-mono text-[11px] text-zinc-300">
             {tokenStats.kbSize} KB · {tokenStats.tokensCurrent} tokens ·{' '}
             {options.compactMode ? (
-              <span className="text-emerald-400 font-semibold">
+              <span className="font-semibold text-emerald-400">
                 {tokenStats.savingsPercentage}% compact savings
               </span>
             ) : (

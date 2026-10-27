@@ -44,7 +44,7 @@ export const SecurityModal: React.FC<SecurityModalProps> = ({ isOpen, onClose })
             <div>
               <div className="font-semibold text-zinc-100 mb-0.5">Zero Backend Services</div>
               <p className="text-zinc-400 text-[11px] leading-relaxed">
-                Tabular does not communicate with any external backend API, database, or analytics service. Inspect the browser Network tab anytime to confirm zero outbound network traffic during paste and export operations.
+                table2MD does not communicate with any external backend API, database, or analytics service. Inspect the browser Network tab anytime to confirm zero outbound network traffic during paste and export operations.
               </p>
             </div>
           </div>

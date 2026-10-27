@@ -14,6 +14,7 @@ import { TemplatesModal } from './components/TemplatesModal';
 import { DocsModal } from './components/DocsModal';
 import { SecurityModal } from './components/SecurityModal';
 import { Toast } from './components/Toast';
+import { FeedbackPage } from './components/FeedbackPage';
 import { Alignment, ExportFormat, FormattingOptions, Preset, TableData, ToastInfo } from './types';
 import { PRESETS } from './utils/presets';
 import { inferColumnAlignment, parseSpreadsheetText } from './utils/parseClipboard';
@@ -49,6 +50,7 @@ export default function App() {
   const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
   const [isDocsOpen, setIsDocsOpen] = useState(false);
   const [isSecurityOpen, setIsSecurityOpen] = useState(false);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
   // Toast
   const [toast, setToast] = useState<ToastInfo | null>(null);
@@ -95,26 +97,18 @@ export default function App() {
 
   // Update Header cell
   const handleUpdateHeader = useCallback((colIdx: number, value: string) => {
-    setTable((prev) => {
-      const newHeaders = [...prev.headers];
-      newHeaders[colIdx] = value;
-      const nextTable = { ...prev, headers: newHeaders };
-      commitTableChange(nextTable);
-      return nextTable;
-    });
-  }, [commitTableChange]);
+    const newHeaders = [...table.headers];
+    newHeaders[colIdx] = value;
+    commitTableChange({ ...table, headers: newHeaders });
+  }, [commitTableChange, table]);
 
   // Update Data cell
   const handleUpdateCell = useCallback((rowIdx: number, colIdx: number, value: string) => {
-    setTable((prev) => {
-      const newRows = prev.rows.map((r, ri) => (ri === rowIdx ? [...r] : r));
-      if (!newRows[rowIdx]) newRows[rowIdx] = new Array(prev.headers.length).fill('');
-      newRows[rowIdx][colIdx] = value;
-      const nextTable = { ...prev, rows: newRows };
-      commitTableChange(nextTable);
-      return nextTable;
-    });
-  }, [commitTableChange]);
+    const newRows = table.rows.map((row) => [...row]);
+    if (!newRows[rowIdx]) newRows[rowIdx] = new Array(table.headers.length).fill('');
+    newRows[rowIdx][colIdx] = value;
+    commitTableChange({ ...table, rows: newRows });
+  }, [commitTableChange, table]);
 
   // Cycle alignment for a single column
   const handleCycleAlignment = useCallback((colIdx: number) => {
@@ -124,80 +118,66 @@ export default function App() {
       return 'left';
     };
 
-    setTable((prev) => {
-      const newAlign = [...prev.alignments];
-      newAlign[colIdx] = cycle(newAlign[colIdx] || 'left');
-      const nextTable = { ...prev, alignments: newAlign };
-      commitTableChange(nextTable);
-      return nextTable;
-    });
-  }, [commitTableChange]);
+    const newAlignments = [...table.alignments];
+    newAlignments[colIdx] = cycle(newAlignments[colIdx] || 'left');
+    commitTableChange({ ...table, alignments: newAlignments });
+  }, [commitTableChange, table]);
 
   // Add column
   const handleAddColumn = useCallback(() => {
-    setTable((prev) => {
-      const newHeaders = [...prev.headers, `Col ${prev.headers.length + 1}`];
-      const newAlignments = [...prev.alignments, 'left' as Alignment];
-      const newRows = prev.rows.map((r) => [...r, '']);
-      const nextTable = { headers: newHeaders, alignments: newAlignments, rows: newRows };
-      commitTableChange(nextTable);
-      showToast('Added column');
-      return nextTable;
-    });
-  }, [commitTableChange, showToast]);
+    const nextTable: TableData = {
+      headers: [...table.headers, `Col ${table.headers.length + 1}`],
+      alignments: [...table.alignments, 'left'],
+      rows: table.rows.map((row) => [...row, '']),
+    };
+    commitTableChange(nextTable);
+    showToast('Added column');
+  }, [commitTableChange, showToast, table]);
 
   // Delete column
   const handleDeleteColumn = useCallback((colIdx: number) => {
-    setTable((prev) => {
-      if (prev.headers.length <= 1) {
-        showToast('Table needs at least one column', 'error');
-        return prev;
-      }
-      const newHeaders = prev.headers.filter((_, i) => i !== colIdx);
-      const newAlignments = prev.alignments.filter((_, i) => i !== colIdx);
-      const newRows = prev.rows.map((r) => r.filter((_, i) => i !== colIdx));
-      const nextTable = { headers: newHeaders, alignments: newAlignments, rows: newRows };
-      commitTableChange(nextTable);
-      showToast('Deleted column');
-      return nextTable;
-    });
-  }, [commitTableChange, showToast]);
+    if (table.headers.length <= 1) {
+      showToast('Table needs at least one column', 'error');
+      return;
+    }
+    const nextTable: TableData = {
+      headers: table.headers.filter((_, i) => i !== colIdx),
+      alignments: table.alignments.filter((_, i) => i !== colIdx),
+      rows: table.rows.map((row) => row.filter((_, i) => i !== colIdx)),
+    };
+    commitTableChange(nextTable);
+    showToast('Deleted column');
+  }, [commitTableChange, showToast, table]);
 
   // Add row
   const handleAddRow = useCallback(() => {
-    setTable((prev) => {
-      const newRows = [...prev.rows, new Array(prev.headers.length).fill('')];
-      const nextTable = { ...prev, rows: newRows };
-      commitTableChange(nextTable);
-      showToast('Added row');
-      return nextTable;
-    });
-  }, [commitTableChange, showToast]);
+    const nextTable = {
+      ...table,
+      rows: [...table.rows, new Array(table.headers.length).fill('')],
+    };
+    commitTableChange(nextTable);
+    showToast('Added row');
+  }, [commitTableChange, showToast, table]);
 
   // Delete row
   const handleDeleteRow = useCallback((rowIdx: number) => {
-    setTable((prev) => {
-      const newRows = prev.rows.filter((_, i) => i !== rowIdx);
-      const finalRows = newRows.length > 0 ? newRows : [new Array(prev.headers.length).fill('')];
-      const nextTable = { ...prev, rows: finalRows };
-      commitTableChange(nextTable);
-      showToast('Deleted row');
-      return nextTable;
-    });
-  }, [commitTableChange, showToast]);
+    const newRows = table.rows.filter((_, i) => i !== rowIdx);
+    const nextTable = {
+      ...table,
+      rows: newRows.length > 0 ? newRows : [new Array(table.headers.length).fill('')],
+    };
+    commitTableChange(nextTable);
+    showToast('Deleted row');
+  }, [commitTableChange, showToast, table]);
 
   // Auto align all columns
   const handleAutoAlignAll = useCallback(() => {
-    setTable((prev) => {
-      const newAlignments = prev.headers.map((_, colIdx) =>
-        inferColumnAlignment(prev.rows, colIdx)
-      );
-      const nextTable = { ...prev, alignments: newAlignments };
-      commitTableChange(nextTable);
-      showToast('Columns automatically aligned');
-      return nextTable;
-    });
-  }, [commitTableChange, showToast]);
+    const newAlignments = table.headers.map((_, colIdx) =>
+      inferColumnAlignment(table.rows, colIdx)
+    );
+    commitTableChange({ ...table, alignments: newAlignments });
+    showToast('Columns automatically aligned');
+  }, [commitTableChange, showToast, table]);
 
   // Clear Grid
   const handleClearGrid = useCallback(() => {
@@ -234,11 +214,16 @@ export default function App() {
   }, [commitTableChange, showToast]);
 
   const handleImportFile = useCallback((content: string, filename: string) => {
-    const parsed = parseSpreadsheetText(content);
-    if (parsed) {
-      handleApplyImportedData(parsed, filename.slice(0, 18));
-    } else {
-      showToast('Could not parse file structure', 'error');
+    try {
+      const parsed = parseSpreadsheetText(content);
+      if (parsed) {
+        handleApplyImportedData(parsed, filename.slice(0, 18));
+      } else {
+        showToast('Could not parse file structure. Check the file format and try again.', 'error');
+      }
+    } catch (error) {
+      console.error(`Could not parse imported file "${filename}":`, error);
+      showToast('An unexpected error occurred while parsing the file.', 'error');
     }
   }, [handleApplyImportedData, showToast]);
 
@@ -253,17 +238,22 @@ export default function App() {
       if (!clipboardText || !clipboardText.trim()) return;
 
       // Check if it looks like a spreadsheet (tab separated, comma separated, or markdown table)
-      const parsed = parseSpreadsheetText(clipboardText);
-      if (parsed && (parsed.headers.length > 1 || parsed.rows.length > 1)) {
-        // Prevent default only if we parsed multi-cell spreadsheet data
-        e.preventDefault();
-        handleApplyImportedData(parsed, 'Pasted Spreadsheet');
+      try {
+        const parsed = parseSpreadsheetText(clipboardText);
+        if (parsed && (parsed.headers.length > 1 || parsed.rows.length > 1)) {
+          // Prevent default only if we parsed multi-cell spreadsheet data
+          e.preventDefault();
+          handleApplyImportedData(parsed, 'Pasted Spreadsheet');
+        }
+      } catch (error) {
+        console.error('Could not parse pasted spreadsheet data:', error);
+        showToast('An unexpected error occurred while parsing pasted data.', 'error');
       }
     };
 
     window.addEventListener('paste', handleGlobalPaste);
     return () => window.removeEventListener('paste', handleGlobalPaste);
-  }, [handleApplyImportedData]);
+  }, [handleApplyImportedData, showToast]);
 
   // Global Keyboard Shortcuts (⌘C to copy markdown, ⌘Z for undo, ⌘Y for redo)
   useEffect(() => {
@@ -300,9 +290,11 @@ export default function App() {
     <div className="bg-[#0c0c0e] text-zinc-100 font-sans antialiased min-h-screen flex flex-col selection:bg-indigo-500/30 selection:text-indigo-200">
       {/* 1. Global Navigation Bar */}
       <Navbar
+        onOpenConverter={() => setIsFeedbackOpen(false)}
         onOpenTemplates={() => setIsTemplatesOpen(true)}
         onOpenDocs={() => setIsDocsOpen(true)}
         onOpenSecurity={() => setIsSecurityOpen(true)}
+        onOpenFeedback={() => setIsFeedbackOpen(true)}
       />
 
       {/* 2. Main Workbench Content */}
@@ -312,6 +304,7 @@ export default function App() {
           currentPresetLabel={currentPresetLabel}
           onSelectPreset={handleSelectPreset}
           onImportFile={handleImportFile}
+          onImportError={(message) => showToast(message, 'error')}
           onClearGrid={handleClearGrid}
           format={format}
           onChangeFormat={setFormat}
@@ -346,7 +339,7 @@ export default function App() {
               format={format}
               options={options}
               tokenStats={tokenStats}
-              onCopySuccess={(msg) => showToast(msg, 'success')}
+              onCopySuccess={(msg, type = 'success') => showToast(msg, type)}
             />
           </div>
         </div>
@@ -389,7 +382,7 @@ export default function App() {
             </kbd>{' '}
             Next Row
           </span>
-          <span>Tabular Studio · 100% Client-Side Open Source MIT</span>
+          <span>table2MD Studio · 100% Client-Side Open Source MIT</span>
         </div>
       </footer>
 
@@ -409,6 +402,12 @@ export default function App() {
       <DocsModal isOpen={isDocsOpen} onClose={() => setIsDocsOpen(false)} />
 
       <SecurityModal isOpen={isSecurityOpen} onClose={() => setIsSecurityOpen(false)} />
+
+      <FeedbackPage
+        isOpen={isFeedbackOpen}
+        onClose={() => setIsFeedbackOpen(false)}
+        onToast={showToast}
+      />
 
       {/* Toast */}
       <Toast toast={toast} />

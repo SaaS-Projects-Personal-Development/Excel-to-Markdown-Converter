@@ -21,7 +21,7 @@ export const DocsModal: React.FC<DocsModalProps> = ({ isOpen, onClose }) => {
             </div>
             <div>
               <h3 className="font-display font-semibold text-base text-zinc-100">
-                Tabular Documentation &amp; Cheatsheet
+                table2MD Documentation &amp; Cheatsheet
               </h3>
               <p className="text-xs text-zinc-400">
                 Markdown table specifications, alignment rules, and LLM prompt engineering tips.
@@ -77,7 +77,7 @@ export const DocsModal: React.FC<DocsModalProps> = ({ isOpen, onClose }) => {
               Standard Markdown tables use extensive whitespace padding to make monospace text align visually in text editors. However, AI models (Claude 3.5, GPT-4o, Gemini 1.5) consume tokens for every space character!
             </p>
             <p className="text-zinc-400 mb-2">
-              <strong className="text-zinc-200">Tabular Compact Mode</strong> strips all non-essential space characters while preserving strict Markdown table syntax (<code className="font-mono text-zinc-300">|A|B|C|</code> with <code className="font-mono text-zinc-300">|:--|:--|:--|</code>).
+              <strong className="text-zinc-200">table2MD Compact Mode</strong> strips all non-essential space characters while preserving strict Markdown table syntax (<code className="font-mono text-zinc-300">|A|B|C|</code> with <code className="font-mono text-zinc-300">|:--|:--|:--|</code>).
             </p>
             <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-mono text-[11px]">
               ✓ Reduces prompt table payload by 30% to 55% tokens with zero loss of semantic comprehension.

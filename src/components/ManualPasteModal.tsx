@@ -25,16 +25,21 @@ export const ManualPasteModal: React.FC<ManualPasteModalProps> = ({
       return;
     }
 
-    const parsed = parseSpreadsheetText(text);
-    if (!parsed) {
-      setError('Could not recognize spreadsheet structure. Please verify columns and rows.');
-      return;
-    }
+    try {
+      const parsed = parseSpreadsheetText(text);
+      if (!parsed) {
+        setError('Could not recognize spreadsheet structure. Please verify columns and rows.');
+        return;
+      }
 
-    onApplyData(parsed);
-    setText('');
-    setError(null);
-    onClose();
+      onApplyData(parsed);
+      setText('');
+      setError(null);
+      onClose();
+    } catch (error) {
+      console.error('Could not parse manually pasted spreadsheet data:', error);
+      setError('An unexpected error occurred while parsing. Please check the content and try again.');
+    }
   };
 
   const samplePlaceholder = `Model\tProvider\tContext\tInput ($/1M)\tOutput ($/1M)

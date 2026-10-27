@@ -1,6 +1,6 @@
 {
-  "name": "Tabular",
-  "description": "Instant Excel-to-Markdown Table Builder for developers, technical writers, and AI prompt engineers. 100% client-side with zero telemetry.",
+  "name": "table2MD",
+  "description": "Instantly convert Excel, Google Sheets, or CSV data into GFM Markdown tables. Features inline editing, auto-alignment, and privacy-first formatting—100% client-side.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

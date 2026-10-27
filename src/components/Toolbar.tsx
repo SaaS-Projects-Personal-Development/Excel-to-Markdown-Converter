@@ -16,6 +16,7 @@ interface ToolbarProps {
   currentPresetLabel: string;
   onSelectPreset: (preset: Preset) => void;
   onImportFile: (content: string, filename: string) => void;
+  onImportError: (message: string) => void;
   onClearGrid: () => void;
   format: ExportFormat;
   onChangeFormat: (format: ExportFormat) => void;
@@ -31,6 +32,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   currentPresetLabel,
   onSelectPreset,
   onImportFile,
+  onImportError,
   onClearGrid,
   format,
   onChangeFormat,
@@ -45,18 +47,32 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const input = e.currentTarget;
+    const file = input.files?.[0];
     if (!file) return;
+    input.value = '';
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      const content = event.target?.result as string;
-      if (content) {
-        onImportFile(content, file.name);
+      const content = event.target?.result;
+      if (typeof content !== 'string') {
+        onImportError(`Could not read "${file.name}" as text.`);
+        return;
       }
+      onImportFile(content, file.name);
     };
-    reader.readAsText(file);
-    e.target.value = '';
+    reader.onerror = () => {
+      onImportError(`Could not read "${file.name}". Please try another file.`);
+    };
+    reader.onabort = () => {
+      onImportError(`Reading "${file.name}" was canceled.`);
+    };
+    try {
+      reader.readAsText(file);
+    } catch (error) {
+      console.error(`Could not read "${file.name}":`, error);
+      onImportError(`Could not read "${file.name}". Please try another file.`);
+    }
   };
 
   return (
